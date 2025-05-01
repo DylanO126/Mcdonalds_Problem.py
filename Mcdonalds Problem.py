@@ -20,8 +20,9 @@ origin = np.min(coords_array, axis=0)
 normalized_coords = coords_array - origin
 
 #Scale the coordinates`
-scaled_latitudes = normalized_coords[:, 0] * 10000
-scaled_longitudes = normalized_coords[:, 1] * 10
+scaled_latitudes = normalized_coords[:, 0] * 100000
+scaled_longitudes = normalized_coords[:, 1] * 100
+
 
 # Define grid cell size
 grid_x_size = 1  # Longitude increments by single digits
@@ -108,9 +109,32 @@ for i in grid_labels:
         mdl.add_constraint(mdl.sum(binary_variables[i,k] for k in range(3)) == 0)
 
 #Size 2
-for i in grid_cells:
-    mdl.add_constraint()
 
+for j in grid_cells:
+    i = j[2]
+    if i == 0:
+        mdl.add_constraint((binary_variables[i,1] + binary_variables[i+1000,1] + binary_variables[i+1000+1,1] + binary_variables[i+1,1]) <= 1)
+    elif i == 853:
+        mdl.add_constraint((binary_variables[i, 1] + binary_variables[i + 1000, 1] + binary_variables[i + 1000 - 1, 1] +
+                            binary_variables[i - 1, 1]) <= 1)
+    elif i == 298853:
+        mdl.add_constraint((binary_variables[i, 1] + binary_variables[i - 1000, 1] + binary_variables[i - 1000 - 1, 1] +
+                            binary_variables[i - 1, 1]) <= 1)
+    elif i == 298000:
+        mdl.add_constraint((binary_variables[i, 1] + binary_variables[i - 1000, 1] + binary_variables[i - 1000 + 1, 1] +
+                            binary_variables[i + 1, 1]) <= 1)
+    elif i % 1000 == 0:
+        mdl.add_constraint((binary_variables[i,1] + binary_variables[i-1000,1] + binary_variables[i-1000+1,1] + binary_variables[i+1,1] + binary_variables[i+1000,1] + binary_variables[i+1000+1,1]) <= 1)
+    elif i//1000 == 0:
+         mdl.add_constraint((binary_variables[i,1] + binary_variables[i-1,1] + binary_variables[i+1,1] + binary_variables[i+1000-1,1] + binary_variables[i+1000,1] + binary_variables[i+1000+1,1]) <= 1)
+    elif i % 1000 == 853:
+        mdl.add_constraint((binary_variables[i, 1] + binary_variables[i - 1000, 1] + binary_variables[i - 1000 - 1, 1] +
+                            binary_variables[i - 1, 1] + binary_variables[i + 1000, 1] + binary_variables[i + 1000 - 1, 1]) <= 1)
+    elif i//1000 == 298:
+        mdl.add_constraint((binary_variables[i, 1] + binary_variables[i - 1, 1] + binary_variables[i + 1, 1] +
+                            binary_variables[i - 1000 - 1, 1] + binary_variables[i - 1000, 1] + binary_variables[i - 1000 + 1, 1]) <= 1)
+    else:
+        mdl.add_constraint((binary_variables[i,1] + binary_variables[i+1000-1,1] + binary_variables[i+1000,1] + binary_variables[i+1000+1,1] + binary_variables[i-1,1] + binary_variables[i+1,1] + binary_variables[i-1000-1,1] + binary_variables[i-1000,1] + binary_variables[i-1000+1,1]) <= 1)
 
 
 # Print confirmation of variables created
